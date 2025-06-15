@@ -1,0 +1,38 @@
+const chatBox = document.getElementById("chat-box");
+const userInput = document.getElementById("user-input");
+
+async function sendMessage() {
+  const message = userInput.value;
+  if (!message) return;
+
+  appendMessage("तू", message);
+  userInput.value = "";
+
+  appendMessage("M-Chat", "विचारते आहे...");
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer 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
+    },
+    body: JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: message }]
+    })
+  });
+
+  const data = await response.json();
+  const reply = data.choices?.[0]?.message?.content || "उत्तर मिळालं नाही 😔";
+
+  // Remove typing text
+  chatBox.lastChild.remove();
+  appendMessage("M-Chat", reply);
+}
+
+function appendMessage(sender, text) {
+  const messageEl = document.createElement("div");
+  messageEl.innerHTML = `<strong>${sender}:</strong> ${text}`;
+  chatBox.appendChild(messageEl);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
